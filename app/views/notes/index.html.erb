@@ -1,23 +1,24 @@
-<p id="notice"><%= notice %></p>
+<div class="container">
+  <p id="notice"><%= notice %></p>
 
-<h1>Notes</h1>
+  <h1>Notes</h1>
 
-<table>
-  <thead>
-    <tr>
-      <th colspan="3"></th>
-    </tr>
-  </thead>
+  <% @notes.each do |note| %>
+      <div class="card mb-2 mt-2 p-2">
+        <div>
+          <img src="<%= note.icon_link %>" class="rounded float-left mr-1">
+          <label class="text-primary"><strong><%= note.name %></strong></label>
+        </div>
+        <ul class="list-unstyled text-muted m-0 ml-3">
+          <li><%= note.created_time %></li>
+          <li><%= note.description %></li>
+        </ul>
 
-  <tbody>
-    <% @notes.each do |note| %>
-      <tr>
-        <td><%= note.name %></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+      </div>
+  <% end %>
 
-<br>
+  <br>
 
-<%= link_to 'New Note', new_note_path %>
+  <%= link_to 'New Note', new_note_path %>
+
+</div>

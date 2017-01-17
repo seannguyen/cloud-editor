@@ -9,10 +9,17 @@ class NotesController < ApplicationController
   # GET /notes
   # GET /notes.json
   def index
+    @page_token = request[:page_token]
     # TODO: catch all kind of error throw by this end point
-    response = @google_api_service.list_files(page_size: 100) #, fields: 'nextPageToken, files(id, name)')
+    response = @google_api_service.list_files(
+        page_size: 20,
+        order_by: "viewedByMeTime desc",
+        q: '(mimeType contains "text" or mimeType contains "plain" or mimeType contains "google-apps")
+             and trashed = false
+             and not mimeType contains "folder"',
+        fields: 'nextPageToken, files(id, name, description, mimeType, iconLink, thumbnailLink, createdTime)')
     @notes = response.files
-    page_token = response.next_page_token
+    @page_token = response.next_page_token
   end
   
   # GET /notes/1
