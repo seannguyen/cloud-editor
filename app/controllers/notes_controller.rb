@@ -2,13 +2,17 @@ require 'google/apis/drive_v3'
 require 'google/api_client/client_secrets'
 
 class NotesController < ApplicationController
+  before_action :verify_google_api_auth
+  before_action :init_google_drive_service
   before_action :set_note, only: [:show, :edit, :update, :destroy]
-  before_action :verify_google_drive_auth
   
   # GET /notes
   # GET /notes.json
   def index
-    @notes = Note.all
+    # TODO: catch all kind of error throw by this end point
+    response = @google_api_service.list_files(page_size: 100) #, fields: 'nextPageToken, files(id, name)')
+    @notes = response.files
+    page_token = response.next_page_token
   end
   
   # GET /notes/1
@@ -71,7 +75,7 @@ class NotesController < ApplicationController
     @note = Note.find(params[:id])
   end
   
-  def verify_google_drive_auth
+  def verify_google_api_auth
     # Check credential ofr gg drive has been in place yet
     return session[:google_drive_credential] if session[:google_drive_credential]
     
@@ -79,7 +83,7 @@ class NotesController < ApplicationController
     client_secrets = Google::APIClient::ClientSecrets.load 'config/google_api_client_secret.json'
     auth_client = client_secrets.to_authorization
     auth_client.update!(
-        :scope => 'https://www.googleapis.com/auth/drive.metadata.readonly',
+        :scope => Google::Apis::DriveV3::AUTH_DRIVE_METADATA_READONLY,
         :redirect_uri => 'http://127.0.0.1:3000/' #request.original_url
     )
     
@@ -93,6 +97,13 @@ class NotesController < ApplicationController
       session[:google_drive_credential] = auth_client.to_json
     end
 
+  end
+  
+  def init_google_drive_service
+    client_opts = JSON.parse(session[:google_drive_credential])
+    auth_client = Signet::OAuth2::Client.new(client_opts)
+    @google_api_service = Google::Apis::DriveV3::DriveService.new
+    @google_api_service.authorization = auth_client
   end
   
   # Never trust parameters from the scary internet, only allow the white list through.
