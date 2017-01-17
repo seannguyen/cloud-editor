@@ -80,7 +80,7 @@ class NotesController < ApplicationController
     auth_client = client_secrets.to_authorization
     auth_client.update!(
         :scope => 'https://www.googleapis.com/auth/drive.metadata.readonly',
-        :redirect_uri => request.original_url
+        :redirect_uri => 'http://127.0.0.1:3000/' #request.original_url
     )
     
     if request[:code] == nil
