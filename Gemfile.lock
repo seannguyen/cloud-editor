@@ -57,6 +57,8 @@ GEM
     faraday (0.10.1)
       multipart-post (>= 1.2, < 3)
     ffi (1.9.14)
+    font-awesome-sass (4.7.0)
+      sass (>= 3.2)
     globalid (0.3.7)
       activesupport (>= 4.1.0)
     google-api-client (0.9.20)
@@ -197,6 +199,7 @@ PLATFORMS
 DEPENDENCIES
   byebug
   coffee-rails (~> 4.2)
+  font-awesome-sass
   google-api-client (~> 0.9)
   jbuilder (~> 2.5)
   jquery-rails
