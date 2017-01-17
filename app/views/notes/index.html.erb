@@ -19,6 +19,15 @@
 
   <br>
 
-  <%= link_to 'New Note', new_note_path %>
+  <div class="d-flex justify-content-around">
+    <%= link_to_unless(@page_tokens[:current_page_token].nil?, \
+                   '<i class="fa fa-angle-double-left" aria-hidden="true"></i>'.html_safe, \
+                   notes_path, class: 'fa-4x') do %>
+        <i class="fa fa-angle-double-left fa-4x text-muted" aria-hidden="true"></i>
+    <% end %>
+    <%= link_to '<i class="fa fa-angle-right" aria-hidden="true"></i>'.html_safe, \
+                  notes_path(current_page_token: @page_tokens[:next_page_token], last_page_token: @page_tokens[:current_page_token]), \
+                  class: 'fa-4x text' %>
+  </div>
 
 </div>
