@@ -19,7 +19,7 @@
 
   <br>
 
-  <div class="d-flex justify-content-around">
+  <div class="d-flex justify-content-around align-items-center">
     <%= link_to_unless(@page_tokens[:current_page_token].nil?, \
                    '<i class="fa fa-angle-double-left" aria-hidden="true"></i>'.html_safe, \
                    notes_path, class: 'fa-4x') do %>
@@ -27,7 +27,7 @@
     <% end %>
     <%= link_to '<i class="fa fa-angle-right" aria-hidden="true"></i>'.html_safe, \
                   notes_path(current_page_token: @page_tokens[:next_page_token], last_page_token: @page_tokens[:current_page_token]), \
-                  class: 'fa-4x text' %>
+                  class: 'fa-4x' %>
   </div>
 
 </div>
