@@ -2,6 +2,8 @@ require 'google/apis/drive_v3'
 require 'google/api_client/client_secrets'
 
 class NotesController < ApplicationController
+  FILE_QUERY_FIELDS = 'id, name, description, mimeType, iconLink, thumbnailLink, createdTime'
+  
   before_action :verify_google_api_auth
   before_action :init_google_drive_service
   before_action :set_note, only: [:show, :edit, :update, :destroy]
@@ -16,14 +18,14 @@ class NotesController < ApplicationController
     }
     
     # TODO: catch all kind of error throw by this end point
-    response = @google_api_service.list_files(
+    response = @google_drive_service.list_files(
         page_size: 10,
         page_token: @page_tokens[:current_page_token],
         order_by: "viewedByMeTime desc",
         q: '(mimeType contains "text" or mimeType contains "plain" or mimeType contains "google-apps")
              and trashed = false
              and not mimeType contains "folder"',
-        fields: 'nextPageToken, files(id, name, description, mimeType, iconLink, thumbnailLink, createdTime)')
+        fields: "nextPageToken, files(#{FILE_QUERY_FIELDS})")
     @notes = response.files
     @page_tokens[:next_page_token] = response.next_page_token
   end
@@ -31,6 +33,7 @@ class NotesController < ApplicationController
   # GET /notes/1
   # GET /notes/1.json
   def show
+    
   end
   
   # GET /notes/new
@@ -61,15 +64,14 @@ class NotesController < ApplicationController
   # PATCH/PUT /notes/1
   # PATCH/PUT /notes/1.json
   def update
-    respond_to do |format|
-      if @note.update(note_params)
-        format.html { redirect_to @note, notice: 'Note was successfully updated.' }
-        format.json { render :show, status: :ok, location: @note }
-      else
-        format.html { render :edit }
-        format.json { render json: @note.errors, status: :unprocessable_entity }
-      end
+    content = StringIO.new @note
+    begin
+      @google_drive_service.update_file params[:id], upload_source: content
+      render :text => content.string
+    rescue
+      render :text => 'fail'
     end
+    
   end
   
   # DELETE /notes/1
@@ -85,7 +87,12 @@ class NotesController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_note
-    @note = Note.find(params[:id])
+    begin
+      content = @google_drive_service.get_file(params[:id], download_dest: StringIO.new)
+    rescue
+      content = @google_drive_service.export_file(params[:id], 'text/plain', download_dest: StringIO.new)
+    end
+    @note = content.string
   end
   
   def verify_google_api_auth
@@ -96,7 +103,7 @@ class NotesController < ApplicationController
     client_secrets = Google::APIClient::ClientSecrets.load 'config/google_api_client_secret.json'
     auth_client = client_secrets.to_authorization
     auth_client.update!(
-        :scope => Google::Apis::DriveV3::AUTH_DRIVE_METADATA_READONLY,
+        :scope => Google::Apis::DriveV3::AUTH_DRIVE,
         :redirect_uri => 'http://127.0.0.1:3000/' #request.original_url
     )
     
@@ -115,8 +122,8 @@ class NotesController < ApplicationController
   def init_google_drive_service
     client_opts = JSON.parse(session[:google_drive_credential])
     auth_client = Signet::OAuth2::Client.new(client_opts)
-    @google_api_service = Google::Apis::DriveV3::DriveService.new
-    @google_api_service.authorization = auth_client
+    @google_drive_service = Google::Apis::DriveV3::DriveService.new
+    @google_drive_service.authorization = auth_client
   end
   
   # Never trust parameters from the scary internet, only allow the white list through.

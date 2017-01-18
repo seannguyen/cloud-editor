@@ -7,7 +7,7 @@
       <div class="card mb-2 mt-2 p-2">
         <div>
           <img src="<%= note.icon_link %>" class="rounded float-left mr-1">
-          <label class="text-primary"><strong><%= note.name %></strong></label>
+          <%= link_to note.name.html_safe, note_path(id: note.id), class: 'font-weight-bold text-primary' %>
         </div>
         <ul class="list-unstyled text-muted m-0 ml-3">
           <li><%= note.created_time %></li>

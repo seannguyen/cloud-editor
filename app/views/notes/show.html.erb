@@ -1,4 +1,9 @@
-<p id="notice"><%= notice %></p>
-
-<%= link_to 'Edit', edit_note_path(@note) %> |
-<%= link_to 'Back', notes_path %>
+<div class="container">
+  <p id="notice"><%= notice %></p>
+  <textarea class="form-control" rows="30"><%= @note %></textarea>
+  <br>
+  <div>
+    <%= link_to 'Back', notes_path %>
+    <%= link_to 'Save', note_path,  method: :patch, remote: true %>
+  </div>
+</div>
