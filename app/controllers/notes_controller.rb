@@ -4,7 +4,6 @@ require 'google/api_client/client_secrets'
 class NotesController < ApplicationController
   FILE_QUERY_FIELDS = 'id, name, description, mimeType, iconLink, thumbnailLink, createdTime'
   
-  before_action :verify_google_api_auth
   before_action :init_google_drive_service
   before_action :set_note, only: [:show, :edit, :update, :destroy]
   
@@ -95,31 +94,12 @@ class NotesController < ApplicationController
     @note = content.string
   end
   
-  def verify_google_api_auth
-    # Check credential ofr gg drive has been in place yet
-    return session[:google_drive_credential] if session[:google_drive_credential]
-    
-    # If not go ahead and get one
-    client_secrets = Google::APIClient::ClientSecrets.load 'config/google_api_client_secret.json'
-    auth_client = client_secrets.to_authorization
-    auth_client.update!(
-        :scope => Google::Apis::DriveV3::AUTH_DRIVE,
-        :redirect_uri => 'http://127.0.0.1:3000/' #request.original_url
-    )
-    
-    if request[:code] == nil
-      auth_uri = auth_client.authorization_uri.to_s
-      redirect_to auth_uri
-    else
-      auth_client.code = request['code']
-      auth_client.fetch_access_token!
-      auth_client.client_secret = nil
-      session[:google_drive_credential] = auth_client.to_json
-    end
-
-  end
-  
   def init_google_drive_service
+    if session[:google_drive_credential].nil?
+      redirect_to auth_index_path(redirect: request.original_url)
+      return
+    end
+    
     client_opts = JSON.parse(session[:google_drive_credential])
     auth_client = Signet::OAuth2::Client.new(client_opts)
     @google_drive_service = Google::Apis::DriveV3::DriveService.new
