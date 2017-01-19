@@ -5,7 +5,9 @@ class AuthController < ApplicationController
     auth_client = client_secrets.to_authorization
     auth_client.update!(
         :scope => Google::Apis::DriveV3::AUTH_DRIVE,
-        :redirect_uri => auth_index_url
+        :redirect_uri => auth_index_url,
+        # TODO: remove this hardcode refresh token and save it the DB instead
+        :refresh_token => '1/DF4DPODLH7GayP4EmEDG1fUi3-FKjYyd0DJgUhiRSPc'
     )
     
     if request[:code].nil?
@@ -16,7 +18,6 @@ class AuthController < ApplicationController
     else
       auth_client.code = request['code']
       auth_client.fetch_access_token!
-      auth_client.client_secret = nil
       session[:google_drive_credential] = auth_client.to_json
       redirect_to session[:post_auth_redirect_uri] || root_path
     end

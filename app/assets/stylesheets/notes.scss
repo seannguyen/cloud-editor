@@ -1,3 +1,24 @@
 // Place all the styles related to the notes controller here.
 // They will automatically be included in application.scss.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+
+
+.note {
+  margin: 20px 0;
+  padding: 70px 50px;
+  flex: 100 1 0;
+
+  -webkit-box-shadow: 1px 1px 5px 0 rgba(0,0,0,1);
+  box-shadow: 1px 1px 5px 0 rgba(0,0,0,1);
+
+  outline: none;
+  border: none;
+
+  resize: none;
+
+  :focus {
+    outline: none;
+    border: none;
+  }
+}

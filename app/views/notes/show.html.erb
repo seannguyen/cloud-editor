@@ -1,9 +1,22 @@
-<div class="container">
-  <p id="notice"><%= notice %></p>
-  <textarea class="form-control" rows="30"><%= @note %></textarea>
-  <br>
-  <div>
+<div class="container h-100">
+  
+  <div class="alert alert-danger mt-2" role="alert" id="note-alert" style="display: none">
+    <div class="d-flex justify-content-between align-items-center">
+      <p></p>
+      <a class="text-danger" role="button" onclick="note.onAlertCloseButtonClick()"><i class="fa fa-times" aria-hidden="true"></i></a>
+    </div>
+  </div>
+  <div class="d-flex flex-column align-items-stretch h-100">
+    <textarea id="note-content" class="note" oninput="note.onContentChange()" res><%= @note %></textarea>
+    <div class="d-flex justify-content-between align-items-center mb-3">
     <%= link_to 'Back', notes_path %>
-    <%= link_to 'Save', note_path,  method: :patch, remote: true %>
+    <button id="note-save-button" class="btn btn-primary pl-5 pr-5" role="button" onclick="note.onSaveButtonClick('<%= note_path %>')" disabled>
+        Save
+        <span class="notification-tick">
+          <span id="note-notification-tick-success"  class="display-none"><i class="fa fa-check text-success" aria-hidden="true"></i></span>
+          <span id="note-notification-tick-loading"  class="display-none"><i class="fa fa-refresh fa-spin" aria-hidden="true"></i></span>
+        </span>
+    </button>
+  </div>
   </div>
 </div>

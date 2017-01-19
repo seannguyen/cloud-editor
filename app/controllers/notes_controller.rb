@@ -63,12 +63,13 @@ class NotesController < ApplicationController
   # PATCH/PUT /notes/1
   # PATCH/PUT /notes/1.json
   def update
-    content = StringIO.new @note
+    render status: 400 and return if params[:content].nil?
+    content = StringIO.new params[:content]
     begin
       @google_drive_service.update_file params[:id], upload_source: content
       render :text => content.string
-    rescue
-      render :text => 'fail'
+    rescue Exception => err
+      render status: 500, text: err.message
     end
     
   end
@@ -101,6 +102,7 @@ class NotesController < ApplicationController
     end
     
     client_opts = JSON.parse(session[:google_drive_credential])
+    puts client_opts
     auth_client = Signet::OAuth2::Client.new(client_opts)
     @google_drive_service = Google::Apis::DriveV3::DriveService.new
     @google_drive_service.authorization = auth_client
