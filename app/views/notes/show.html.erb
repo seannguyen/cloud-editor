@@ -1,4 +1,4 @@
-<div class="container h-100">
+<div class="container h-100 p-0">
   
   <div class="alert alert-danger mt-2" role="alert" id="note-alert" style="display: none">
     <div class="d-flex justify-content-between align-items-center">
@@ -7,16 +7,17 @@
     </div>
   </div>
   <div class="d-flex flex-column align-items-stretch h-100">
-    <textarea id="note-content" class="note" oninput="note.onContentChange()" res><%= @note %></textarea>
-    <div class="d-flex justify-content-between align-items-center mb-3">
-    <%= link_to 'Back', notes_path %>
-    <button id="note-save-button" class="btn btn-primary pl-5 pr-5" role="button" onclick="note.onSaveButtonClick('<%= note_path %>')" disabled>
-        Save
-        <span class="notification-tick">
-          <span id="note-notification-tick-success"  class="display-none"><i class="fa fa-check text-success" aria-hidden="true"></i></span>
-          <span id="note-notification-tick-loading"  class="display-none"><i class="fa fa-refresh fa-spin" aria-hidden="true"></i></span>
-        </span>
-    </button>
+    <textarea id="note-content" class="note p-2 p-sm-3 p-md-4 p-lg-5 m-sm-5" oninput="note.onContentChange()" res><%= @note %></textarea>
+    <div class="d-flex justify-content-between align-items-center m-3">
+      <%= link_to 'Back', notes_path %>
+
+      <button id="note-save-button" class="btn btn-primary" role="button" onclick="note.onSaveButtonClick('<%= note_path %>')" disabled style="position: relative;">
+          Save
+          <span class="notification-tick">
+            <span id="note-notification-tick-success" class="display-none"><i class="fa fa-check text-success" aria-hidden="true"></i></span>
+            <span id="note-notification-tick-loading" class="display-none"><i class="fa fa-refresh fa-spin text-gray-dark" aria-hidden="true"></i></span>
+          </span>
+      </button>
   </div>
   </div>
 </div>
