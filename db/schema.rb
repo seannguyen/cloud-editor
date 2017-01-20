@@ -10,11 +10,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170113091931) do
+ActiveRecord::Schema.define(version: 20170120182308) do
 
   create_table "notes", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "notes_users", id: false, force: :cascade do |t|
+    t.integer "note_id", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id", "note_id"], name: "index_notes_users_on_user_id_and_note_id", unique: true
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string   "google_api_refresh_token"
+    t.datetime "created_at",               null: false
+    t.datetime "updated_at",               null: false
   end
 
 end
