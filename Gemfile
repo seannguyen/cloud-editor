@@ -35,7 +35,7 @@ gem 'jbuilder', '~> 2.5'
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
-gem 'google-api-client', '~> 0.9'
+gem 'google-api-client', '~> 0.9', require: ['google/apis/drive_v3', 'google/api_client/client_secrets']
 gem 'font-awesome-sass'
 source 'https://rails-assets.org' do
   gem 'rails-assets-tether', '>= 1.3.3'
