@@ -20,6 +20,7 @@ class AuthController < ApplicationController
       auth_client.fetch_access_token!
       session[:google_drive_credential] = auth_client.to_json
       redirect_to session[:post_auth_redirect_uri] || root_path
+      session.delete(:post_auth_redirect_uri)
     end
   end
 end
