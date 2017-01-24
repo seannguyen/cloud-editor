@@ -14,16 +14,25 @@ class NotesController < ApplicationController
     }
     
     # TODO: catch all kind of error throw by this end point
-    response = @google_drive_service.list_files(
-        page_size: 10,
-        page_token: @page_tokens[:current_page_token],
-        order_by: "viewedByMeTime desc",
-        q: '(mimeType contains "text" or mimeType contains "plain" or mimeType contains "google-apps")
-             and trashed = false
-             and not mimeType contains "folder"',
-        fields: "nextPageToken, files(#{FILE_QUERY_FIELDS})")
-    @notes = response.files
-    @page_tokens[:next_page_token] = response.next_page_token
+    begin
+      response = @google_drive_service.list_files(
+          page_size: 10,
+          page_token: @page_tokens[:current_page_token],
+          order_by: "viewedByMeTime desc",
+          q: '(mimeType contains "text" or mimeType contains "plain" or mimeType contains "google-apps")
+               and trashed = false
+               and not mimeType contains "folder"',
+          fields: "nextPageToken, files(#{FILE_QUERY_FIELDS})")
+      @notes = response.files
+      @page_tokens[:next_page_token] = response.next_page_token
+    rescue Google::Apis::ServerError > err
+      # @raise [Google::Apis::ServerError] An error occurred on the server and the request can be retried
+      render :google_internal_error
+    rescue Google::Apis::ClientError, Google::Apis::AuthorizationError
+      # @raise [Google::Apis::ClientError] The request is invalid and should not be retried without modification
+      # @raise [Google::Apis::AuthorizationError] Authorization is required
+      redirect_to auth_index_url
+    end
   end
   
   # GET /notes/1
@@ -65,8 +74,13 @@ class NotesController < ApplicationController
     begin
       @google_drive_service.update_file params[:id], upload_source: content
       render :text => content.string
-    rescue Exception => err
-      render status: 500, text: err.message
+    rescue Google::Apis::ServerError > err
+      # @raise [Google::Apis::ServerError] An error occurred on the server and the request can be retried
+      render :google_internal_error
+    rescue Google::Apis::ClientError, Google::Apis::AuthorizationError
+      # @raise [Google::Apis::ClientError] The request is invalid and should not be retried without modification
+      # @raise [Google::Apis::AuthorizationError] Authorization is required
+      redirect_to auth_index_url
     end
     
   end
@@ -86,6 +100,13 @@ class NotesController < ApplicationController
   def set_note
     begin
       content = @google_drive_service.get_file(params[:id], download_dest: StringIO.new)
+    rescue Google::Apis::ServerError > err
+      # @raise [Google::Apis::ServerError] An error occurred on the server and the request can be retried
+      render :google_internal_error
+    rescue Google::Apis::ClientError, Google::Apis::AuthorizationError
+      # @raise [Google::Apis::ClientError] The request is invalid and should not be retried without modification
+      # @raise [Google::Apis::AuthorizationError] Authorization is required
+      redirect_to auth_index_url
     rescue
       content = @google_drive_service.export_file(params[:id], 'text/plain', download_dest: StringIO.new)
     end
