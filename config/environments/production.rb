@@ -83,4 +83,6 @@ Rails.application.configure do
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
+  
+  config.google_drive_api_secret = {"web":{"client_id":"363819428793-o93rpp9b1nmsqhttp5mlrci6maeau6rj.apps.googleusercontent.com","project_id":"cloud-editor-154609","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://accounts.google.com/o/oauth2/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"5iu49miXxaqeEOsUOqfKCZbQ","redirect_uris":["http://127.0.0.1:8080/auth","https://127.0.0.1:8080/auth"],"javascript_origins":["http://127.0.0.1:8080"]}}
 end

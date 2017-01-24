@@ -90,7 +90,12 @@ class NotesController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_note
-    content = @google_drive_service.get_file(params[:id], download_dest: StringIO.new)
+    begin
+      content = @google_drive_service.get_file(params[:id], download_dest: StringIO.new)
+    rescue
+      content = @google_drive_service.export_file(params[:id], 'text/plain', download_dest: StringIO.new)
+    end
+    @note = content.string
   end
   
   def init_google_drive_service
