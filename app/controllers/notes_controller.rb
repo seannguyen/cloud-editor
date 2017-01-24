@@ -1,6 +1,3 @@
-require 'google/apis/drive_v3'
-require 'google/api_client/client_secrets'
-
 class NotesController < ApplicationController
   FILE_QUERY_FIELDS = 'id, name, description, mimeType, iconLink, thumbnailLink, createdTime'
   

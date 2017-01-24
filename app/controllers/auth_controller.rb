@@ -1,7 +1,7 @@
 class AuthController < ApplicationController
   def index
     # If not go ahead and get one
-    client_secrets = Google::APIClient::ClientSecrets.load 'config/google_api_client_secret.json'
+    client_secrets = Google::APIClient::ClientSecrets.new Rails.application.config.google_drive_api_secret
     auth_client = client_secrets.to_authorization
     auth_client.update!(
         :scope => Google::Apis::DriveV3::AUTH_DRIVE,
