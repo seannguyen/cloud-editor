@@ -4,6 +4,17 @@ class NotesController < ApplicationController
   before_action :init_google_drive_service
   before_action :set_note, only: [:show, :edit, :update, :destroy]
   
+  rescue_from Google::Apis::ServerError do
+    # @raise [Google::Apis::ServerError] An error occurred on the server and the request can be retried
+    render :google_internal_error
+  end
+
+  rescue_from Google::Apis::ClientError, Google::Apis::AuthorizationError, ArgumentError do
+    # @raise [Google::Apis::ClientError] The request is invalid and should not be retried without modification
+    # @raise [Google::Apis::AuthorizationError] Authorization is required
+    redirect_to auth_index_url
+  end
+  
   # GET /notes
   # GET /notes.json
   def index
@@ -13,26 +24,16 @@ class NotesController < ApplicationController
         next_page_token: nil
     }
     
-    # TODO: catch all kind of error throw by this end point
-    begin
-      response = @google_drive_service.list_files(
-          page_size: 10,
-          page_token: @page_tokens[:current_page_token],
-          order_by: "viewedByMeTime desc",
-          q: '(mimeType contains "text" or mimeType contains "plain" or mimeType contains "google-apps")
+    response = @google_drive_service.list_files(
+        page_size: 10,
+        page_token: @page_tokens[:current_page_token],
+        order_by: "viewedByMeTime desc",
+        q: '(mimeType contains "text" or mimeType contains "plain" or mimeType contains "google-apps")
                and trashed = false
                and not mimeType contains "folder"',
-          fields: "nextPageToken, files(#{FILE_QUERY_FIELDS})")
-      @notes = response.files
-      @page_tokens[:next_page_token] = response.next_page_token
-    rescue Google::Apis::ServerError > err
-      # @raise [Google::Apis::ServerError] An error occurred on the server and the request can be retried
-      render :google_internal_error
-    rescue Google::Apis::ClientError, Google::Apis::AuthorizationError
-      # @raise [Google::Apis::ClientError] The request is invalid and should not be retried without modification
-      # @raise [Google::Apis::AuthorizationError] Authorization is required
-      redirect_to auth_index_url
-    end
+        fields: "nextPageToken, files(#{FILE_QUERY_FIELDS})")
+    @notes = response.files
+    @page_tokens[:next_page_token] = response.next_page_token
   end
   
   # GET /notes/1
@@ -71,18 +72,9 @@ class NotesController < ApplicationController
   def update
     render status: 400 and return if params[:content].nil?
     content = StringIO.new params[:content]
-    begin
-      @google_drive_service.update_file params[:id], upload_source: content
-      render :text => content.string
-    rescue Google::Apis::ServerError > err
-      # @raise [Google::Apis::ServerError] An error occurred on the server and the request can be retried
-      render :google_internal_error
-    rescue Google::Apis::ClientError, Google::Apis::AuthorizationError
-      # @raise [Google::Apis::ClientError] The request is invalid and should not be retried without modification
-      # @raise [Google::Apis::AuthorizationError] Authorization is required
-      redirect_to auth_index_url
-    end
-    
+
+    @google_drive_service.update_file params[:id], upload_source: content
+    render :text => content.string
   end
   
   # DELETE /notes/1
@@ -98,19 +90,7 @@ class NotesController < ApplicationController
   private
   # Use callbacks to share common setup or constraints between actions.
   def set_note
-    begin
-      content = @google_drive_service.get_file(params[:id], download_dest: StringIO.new)
-    rescue Google::Apis::ServerError > err
-      # @raise [Google::Apis::ServerError] An error occurred on the server and the request can be retried
-      render :google_internal_error
-    rescue Google::Apis::ClientError, Google::Apis::AuthorizationError
-      # @raise [Google::Apis::ClientError] The request is invalid and should not be retried without modification
-      # @raise [Google::Apis::AuthorizationError] Authorization is required
-      redirect_to auth_index_url
-    rescue
-      content = @google_drive_service.export_file(params[:id], 'text/plain', download_dest: StringIO.new)
-    end
-    @note = content.string
+    content = @google_drive_service.get_file(params[:id], download_dest: StringIO.new)
   end
   
   def init_google_drive_service
