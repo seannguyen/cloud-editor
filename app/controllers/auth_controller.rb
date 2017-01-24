@@ -6,13 +6,10 @@ class AuthController < ApplicationController
     auth_client.update!(
         :scope => Google::Apis::DriveV3::AUTH_DRIVE,
         :redirect_uri => auth_index_url,
-        # TODO: remove this hardcode refresh token and save it the DB instead
-        :refresh_token => '1/DF4DPODLH7GayP4EmEDG1fUi3-FKjYyd0DJgUhiRSPc'
     )
     
     if request[:code].nil?
-      post_auth_redirect_uri = params[:redirect] || root_path
-      session[:post_auth_redirect_uri] = post_auth_redirect_uri
+      session[:post_auth_redirect_uri] = params[:redirect] || root_path
       auth_uri = auth_client.authorization_uri.to_s
       redirect_to auth_uri
     else
