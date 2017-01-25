@@ -20,10 +20,3 @@ server {
     client_max_body_size 4G;
     keepalive_timeout 10;
 }
-
-# Redirect all request to naked domain to www subdomain
-server {
-    listen 80;
-    server_name cloudeditor.pisces.tech;
-    return 301 $scheme://www.$server_name$request_uri;
-}
