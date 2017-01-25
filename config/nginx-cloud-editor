@@ -1,0 +1,29 @@
+upstream app {
+    server 128.199.157.154:3000 fail_timeout=0;
+}
+
+server {
+    listen 80;
+    server_name www.cloudeditor.pisces.tech;
+
+    root /srv/cloud-editor/public;
+
+    try_files $uri/index.html $uri @app;
+
+    location @app {
+        proxy_pass http://app;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $http_host;
+        proxy_redirect off;
+    }
+
+    client_max_body_size 4G;
+    keepalive_timeout 10;
+}
+
+# Redirect all request to naked domain to www subdomain
+server {
+    listen 80;
+    server_name cloudeditor.pisces.tech;
+    return 301 $scheme://www.$server_name$request_uri;
+}
